@@ -1303,6 +1303,27 @@ window.WAPI.removeParticipantGroup = function(idGroup, idParticipant, done){
     
 }
 
+/**
+ * Add participant to Group
+ * @param {*} idGroup '0000000000-00000000@g.us'
+ * @param {*} idParticipant '000000000000@c.us'
+ * @param {*} done - function - Callback function to be called when a new message arrives.
+ */
+window.WAPI.addParticipantGroup = function(idGroup, idParticipant, done){
+    const metaDataGroup = window.Store.GroupMetadata.get(idGroup);
+    if (metaDataGroup === undefined){
+        done(false); return false;
+    }
+
+    
+    metaDataGroup.participants.addParticipants([{id: idParticipant}]).then((ret)=>{
+        const check = metaDataGroup.participants.get(idParticipant);
+        if (check === true){ done(true); return true; }
+        done(false); return false; 
+    })
+    
+}
+
 
 /**
  * Promote Participant to Admin in Group
@@ -1334,6 +1355,14 @@ window.WAPI.promoteParticipantAdminGroup = function(idGroup, idParticipant, done
 }
 
 
+window.WAPI.setTyping = function () {
+    if (!Array.isArray(contactsId)) {
+        contactsId = [contactsId];
+    }
+
+    return window.Store.Wap.createGroup(name, contactsId);
+};
+
 /**
  * Demote Admin of Group
  * @param {*} idGroup '0000000000-00000000@g.us'
@@ -1359,4 +1388,60 @@ window.WAPI.demoteParticipantAdminGroup = function(idGroup, idParticipant, done)
         done(true); return true; 
     })
     
+}
+
+
+/**
+ * Set typing state for some chat
+ * 
+ * @param {*} idChat '000000000000@c.us'
+ * @param {*} done - function - Callback function to be called at the end with the result
+ */
+window.WAPI.setTyping = function(idChat, done){
+    const chat = window.WAPI.getChat(idChat);
+    if(chat == undefined){
+        done(false); return false;
+    }
+    // chat.typing = true; Later is neccesary to check
+    // possible inconsistences with chat._resendPresence to avoid be banned
+    window.Store.Wap.sendChatstateComposing(chat.id);
+    done(true); return true;
+}
+
+/**
+ * UnSet typing state for some chat
+ 
+ * 
+ * @param {*} idChat '000000000000@c.us'
+ * 
+ */
+window.WAPI.unsetTyping = function(idChat,done){
+    var chat = window.WAPI.getChat(idChat)
+    if(chat == undefined){
+        done(false); return false;
+    }
+    // chat.typing = false; 
+    window.Store.Wap.sendChatstatePaused(chat.id)
+    done(true); return true;
+}
+
+/**
+ * Set Typing state for some interval
+ * 
+ * @param {*} idChat '000000000000@c.us'
+ * @param {*} time '1500' for 1.5s
+ * @param {*} done - function - Callback function to be called at the end with the result
+ */
+window.WAPI.TypingOverTime = function(idChat,time,done){
+    if(window.WAPI.typing_timeout != undefined){
+        window.WAPI.unset("typing_timeout");
+    }
+
+    window.WAPI.setTyping(idChat)
+    
+    window.WAPI.typing_timeout = setTimeout(
+        window.WAPI.unsetTyping,
+    )
+    
+    done(true); return true;
 }

@@ -754,3 +754,9 @@ class WhatsAPIDriver(object):
 
     def demote_participant_admin_group(self, idGroup, idParticipant):
         return self.wapi_functions.demoteParticipantAdminGroup(idGroup,idParticipant)
+
+    def add_participant_group(self,idGroup, idParticipant):
+        return self.wapi_functions.addParticipantGroup(idGroup,idParticipant)
+    
+    def typing_over_time(self,idChat,time):
+        return self.wapi_functions.TypingOverTime(idChat,time)

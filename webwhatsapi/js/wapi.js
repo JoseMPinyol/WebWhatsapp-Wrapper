@@ -1400,12 +1400,14 @@ window.WAPI.demoteParticipantAdminGroup = function(idGroup, idParticipant, done)
 window.WAPI.setTyping = function(idChat, done){
     const chat = window.WAPI.getChat(idChat);
     if(chat == undefined){
-        done(false); return false;
+        if(done != undefined) done(false);
+        return false;
     }
     // chat.typing = true; Later is neccesary to check
     // possible inconsistences with chat._resendPresence to avoid be banned
     window.Store.Wap.sendChatstateComposing(chat.id);
-    done(true); return true;
+    if(done != undefined) done(true);
+    return true;
 }
 
 /**
@@ -1418,11 +1420,13 @@ window.WAPI.setTyping = function(idChat, done){
 window.WAPI.unsetTyping = function(idChat,done){
     var chat = window.WAPI.getChat(idChat)
     if(chat == undefined){
-        done(false); return false;
+        if(done != undefined) done(false);
+        return false;
     }
     // chat.typing = false; 
     window.Store.Wap.sendChatstatePaused(chat.id)
-    done(true); return true;
+    if(done != undefined) done(true);
+    return true;
 }
 
 /**
@@ -1434,14 +1438,14 @@ window.WAPI.unsetTyping = function(idChat,done){
  */
 window.WAPI.TypingOverTime = function(idChat,time,done){
     if(window.WAPI.typing_timeout != undefined){
-        window.WAPI.unset("typing_timeout");
+        clearTimeout(window.WAPI.typing_timeout)
     }
 
     window.WAPI.setTyping(idChat)
     
     window.WAPI.typing_timeout = setTimeout(
-        window.WAPI.unsetTyping,
+        window.WAPI.unsetTyping , time, idChat,done
+
     )
-    
-    done(true); return true;
+    return True;
 }
